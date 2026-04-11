@@ -5,6 +5,7 @@ class Transaction {
   final DateTime timestamp;
   final String status;
   final String sourceApp;
+  final String type; // 'credit' or 'debit'
 
   Transaction({
     required this.id,
@@ -13,6 +14,7 @@ class Transaction {
     required this.timestamp,
     required this.status,
     required this.sourceApp,
+    this.type = 'credit',
   });
 
   factory Transaction.fromJson(Map<String, dynamic> json) {
@@ -23,6 +25,7 @@ class Transaction {
       timestamp: json['timestamp'] != null ? DateTime.tryParse(json['timestamp']) ?? DateTime.now() : DateTime.now(),
       status: json['status'] as String? ?? 'Pending',
       sourceApp: json['sourceApp'] as String? ?? 'Unknown',
+      type: json['type'] as String? ?? 'credit',
     );
   }
 
@@ -34,6 +37,7 @@ class Transaction {
       'timestamp': timestamp.toIso8601String(),
       'status': status,
       'sourceApp': sourceApp,
+      'type': type,
     };
   }
 }

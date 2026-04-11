@@ -31,9 +31,14 @@ class PaymentNotifier extends StateNotifier<List<Transaction>> {
     final localDb = ref.read(localStorageProvider);
     await localDb.savePayment(tx.toJson());
 
-    // 3. Publish to MQTT
-    final mqtt = ref.read(mqttServiceProvider);
-    mqtt.publishPayment('{"amount": ${tx.amount}, "sender": "${tx.senderName}", "status": "success"}');
+    // 3. Publish to MQTT (only credit/received payments)
+    if (tx.type == 'credit') {
+      final mqtt = ref.read(mqttServiceProvider);
+      mqtt.publishPayment('{"amount": ${tx.amount}, "sender": "${tx.senderName}", "status": "success", "type": "${tx.type}"}');
+      print('Payment published to MQTT: ${tx.amount} from ${tx.senderName}');
+    } else {
+      print('Debit payment not published to MQTT: ${tx.amount}');
+    }
 
     // 4. Sync to Cloud
     final api = ref.read(apiServiceProvider);

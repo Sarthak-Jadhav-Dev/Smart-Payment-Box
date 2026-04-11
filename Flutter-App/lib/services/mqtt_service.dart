@@ -50,6 +50,9 @@ class MqttService {
       final builder = MqttClientPayloadBuilder();
       builder.addString(payload);
       client!.publishMessage('merchant/payment', MqttQos.exactlyOnce, builder.payload!);
+      print('MQTT Published to merchant/payment: $payload');
+    } else {
+      print('MQTT Not connected - payment not published');
     }
   }
 

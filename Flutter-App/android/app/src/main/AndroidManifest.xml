@@ -31,10 +31,12 @@
             android:name="flutterEmbedding"
             android:value="2" />
         
-        <service android:name=".UPIPaymentListenerService"
-                 android:label="UPI Payment"
+        <service android:name="com.merchant.assistant.smart_merchant_assistant.UPIPaymentListenerService"
+                 android:label="UPI Payment Listener"
                  android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
-                 android:exported="true">
+                 android:exported="true"
+                 android:enabled="true"
+                 android:foregroundServiceType="dataSync">
             <intent-filter>
                 <action android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>

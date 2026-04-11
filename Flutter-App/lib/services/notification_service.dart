@@ -19,9 +19,17 @@ class NotificationService {
     final title = data['title'] as String;
     final text = data['text'] as String;
 
+    print('DEBUG: Received notification');
+    print('DEBUG: packageName=$packageName');
+    print('DEBUG: title=$title');
+    print('DEBUG: text=$text');
+
     final transaction = NotificationParser.parseNotification(packageName, title, text);
     if (transaction != null) {
+      print('DEBUG: Parsed transaction: ${transaction.toJson()}');
       ref.read(paymentProvider.notifier).addTransaction(transaction);
+    } else {
+      print('DEBUG: Failed to parse transaction');
     }
   }
 
