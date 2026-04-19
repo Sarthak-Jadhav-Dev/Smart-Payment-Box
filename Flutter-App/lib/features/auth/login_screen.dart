@@ -34,8 +34,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 
-  Future<void> _signInWithGoogle() async {
-    await ref.read(authProvider.notifier).signInWithGoogle();
+  Future<void> _signInAsGuest() async {
+    await ref.read(authProvider.notifier).signInAsGuest();
 
     final authState = ref.read(authProvider);
     if (authState.isAuthenticated && mounted) {
@@ -47,12 +47,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
 
-    // Show error if any
-    if (authState.error != null) {
-      Future.microtask(() {
+    // Listen to auth errors and show snackbar reactively
+    ref.listen<AuthState>(authProvider, (previous, next) {
+      if (next.error != null && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(authState.error!),
+            content: Text(next.error!),
             backgroundColor: AppTheme.error,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
@@ -61,8 +61,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           ),
         );
         ref.read(authProvider.notifier).clearError();
-      });
-    }
+      }
+    });
 
     return Scaffold(
       backgroundColor: AppTheme.darkBackground,
@@ -83,13 +83,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      AppTheme.accentGreen.withOpacity(0.2),
-                      AppTheme.accentBlue.withOpacity(0.1),
+                      AppTheme.accentGreen.withValues(alpha: 0.2),
+                      AppTheme.accentBlue.withValues(alpha: 0.1),
                     ],
                   ),
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
-                    color: AppTheme.accentGreen.withOpacity(0.3),
+                    color: AppTheme.accentGreen.withValues(alpha: 0.3),
                     width: 2,
                   ),
                 ),
@@ -145,7 +145,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: authState.isLoading ? null : _signInWithGoogle,
+                  onPressed: authState.isLoading ? null : _signInAsGuest,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: AppTheme.darkBackground,
@@ -169,28 +169,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       : Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            // Google icon placeholder
-                            Container(
-                              width: 24,
-                              height: 24,
-                              decoration: const BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Center(
-                                child: Text(
-                                  'G',
-                                  style: TextStyle(
-                                    color: Colors.blue,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
+                            const Icon(
+                              Icons.person_outline,
+                              color: AppTheme.darkBackground,
                             ),
                             const SizedBox(width: 12),
                             const Text(
-                              'Sign in with Google',
+                              'Continue as Guest',
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,

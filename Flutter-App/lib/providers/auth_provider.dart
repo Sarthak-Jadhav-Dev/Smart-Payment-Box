@@ -1,9 +1,7 @@
 import 'dart:convert';
 import 'dart:developer' as developer;
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 // ignore: unused_import
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
@@ -75,9 +73,6 @@ class User {
 }
 
 class AuthNotifier extends StateNotifier<AuthState> {
-  final GoogleSignIn _googleSignIn = GoogleSignIn(
-    scopes: ['email', 'profile'],
-  );
 
   AuthNotifier() : super(AuthState()) {
     _checkAuthStatus();
@@ -102,24 +97,17 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
-  Future<void> signInWithGoogle() async {
+  Future<void> signInAsGuest() async {
     try {
       state = state.copyWith(isLoading: true, error: null);
 
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) {
-        state = state.copyWith(isLoading: false, error: 'Sign in cancelled');
-        return;
-      }
-
-      // Get authentication if needed for backend verification
-      await googleUser.authentication;
+      // Simulate a small delay for realistic UX
+      await Future.delayed(const Duration(milliseconds: 500));
 
       final user = User(
-        id: googleUser.id,
-        name: googleUser.displayName ?? 'User',
-        email: googleUser.email,
-        photoUrl: googleUser.photoUrl,
+        id: 'guest_${DateTime.now().millisecondsSinceEpoch}',
+        name: 'Guest User',
+        email: 'guest@example.com',
       );
 
       // Save user data
@@ -134,9 +122,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
         isFirstTime: false,
       );
 
-      developer.log('Google Sign-In successful: ${user.email}');
+      developer.log('Guest Sign-In successful');
     } catch (e, stack) {
-      developer.log('Google Sign-In error', error: e, stackTrace: stack);
+      developer.log('Guest Sign-In error', error: e, stackTrace: stack);
       state = state.copyWith(
         isLoading: false,
         error: 'Failed to sign in: ${e.toString()}',
@@ -146,7 +134,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   Future<void> signOut() async {
     try {
-      await _googleSignIn.signOut();
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('user_data');
 

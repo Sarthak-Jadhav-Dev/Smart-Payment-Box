@@ -43,13 +43,13 @@ class OnboardingPage extends StatelessWidget {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  data.gradientColors[0].withOpacity(0.2),
-                  data.gradientColors[1].withOpacity(0.1),
+                  data.gradientColors[0].withValues(alpha: 0.2),
+                  data.gradientColors[1].withValues(alpha: 0.1),
                 ],
               ),
               borderRadius: BorderRadius.circular(24),
               border: Border.all(
-                color: data.gradientColors[0].withOpacity(0.3),
+                color: data.gradientColors[0].withValues(alpha: 0.3),
                 width: 2,
               ),
             ),

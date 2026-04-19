@@ -106,7 +106,7 @@ class NotificationParser {
   static Transaction? _parseBankApp(String title, String text) {
     // CREDIT: "₹1.00 received via UPI" / "Received Rs.1.00 from"
     // DEBIT: "₹1.00 sent via UPI" / "Debited Rs.1.00"
-    final content = (title + ' ' + text).toLowerCase();
+    final content = '$title $text'.toLowerCase();
     final isCredit = content.contains('received') || content.contains('credited') || content.contains('deposited');
     final isDebit = content.contains('sent') || content.contains('debited') || content.contains('withdrawn');
     

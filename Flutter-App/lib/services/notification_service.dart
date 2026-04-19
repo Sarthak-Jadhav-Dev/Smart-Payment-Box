@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/notification_parser.dart';
@@ -19,21 +20,20 @@ class NotificationService {
     final title = data['title'] as String;
     final text = data['text'] as String;
 
-    print('DEBUG: Received notification');
-    print('DEBUG: packageName=$packageName');
-    print('DEBUG: title=$title');
-    print('DEBUG: text=$text');
+    developer.log('Notification received: pkg=$packageName', name: 'NotificationService');
+    developer.log('title=$title', name: 'NotificationService');
+    developer.log('text=$text', name: 'NotificationService');
 
     final transaction = NotificationParser.parseNotification(packageName, title, text);
     if (transaction != null) {
-      print('DEBUG: Parsed transaction: ${transaction.toJson()}');
+      developer.log('Parsed transaction: ${transaction.toJson()}', name: 'NotificationService');
       ref.read(paymentProvider.notifier).addTransaction(transaction);
     } else {
-      print('DEBUG: Failed to parse transaction');
+      developer.log('Failed to parse transaction', name: 'NotificationService');
     }
   }
 
   void _onError(Object error) {
-    print('Notification Service Error: $error');
+    developer.log('Notification Service Error: $error', name: 'NotificationService', error: error);
   }
 }

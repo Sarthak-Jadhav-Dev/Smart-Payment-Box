@@ -34,7 +34,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                 filled: true,
-                fillColor: Theme.of(context).colorScheme.surfaceVariant,
+                fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
               ),
               onChanged: (val) => setState(() => _searchQuery = val),
             ),

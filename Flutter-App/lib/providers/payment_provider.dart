@@ -35,9 +35,9 @@ class PaymentNotifier extends StateNotifier<List<Transaction>> {
     if (tx.type == 'credit') {
       final mqtt = ref.read(mqttServiceProvider);
       mqtt.publishPayment('{"amount": ${tx.amount}, "sender": "${tx.senderName}", "status": "success", "type": "${tx.type}"}');
-      print('Payment published to MQTT: ${tx.amount} from ${tx.senderName}');
+      developer.log('Payment published to MQTT: ${tx.amount} from ${tx.senderName}', name: 'PaymentProvider');
     } else {
-      print('Debit payment not published to MQTT: ${tx.amount}');
+      developer.log('Debit payment not published to MQTT: ${tx.amount}', name: 'PaymentProvider');
     }
 
     // 4. Sync to Cloud

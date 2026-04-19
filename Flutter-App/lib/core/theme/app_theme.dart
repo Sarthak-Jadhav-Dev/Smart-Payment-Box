@@ -25,11 +25,9 @@ class AppTheme {
         primary: accentGreen,
         secondary: accentBlue,
         surface: darkSurface,
-        background: darkBackground,
         onPrimary: darkBackground,
         onSecondary: textPrimary,
         onSurface: textPrimary,
-        onBackground: textPrimary,
         error: error,
       ),
       cardTheme: CardThemeData(
@@ -37,7 +35,7 @@ class AppTheme {
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: textMuted.withOpacity(0.2)),
+          side: BorderSide(color: textSecondary),
         ),
       ),
       appBarTheme: const AppBarTheme(
@@ -95,7 +93,7 @@ class AppTheme {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: textMuted.withOpacity(0.3)),
+          borderSide: const BorderSide(color: textSecondary),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -140,7 +138,7 @@ class AppTheme {
         ),
       ),
       dividerTheme: DividerThemeData(
-        color: textMuted.withOpacity(0.2),
+        color: textSecondary,
         thickness: 1,
       ),
       listTileTheme: ListTileThemeData(

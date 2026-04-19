@@ -1,4 +1,4 @@
-import 'dart:async';
+import 'dart:developer' as developer;
 import 'dart:io';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
@@ -28,10 +28,10 @@ class MqttService {
     try {
       await client!.connect();
     } on NoConnectionException catch (e) {
-      print('MQTT Exception: $e');
+      developer.log('MQTT Exception: $e', name: 'MqttService');
       client!.disconnect();
     } on SocketException catch (e) {
-      print('MQTT SocketException: $e');
+      developer.log('MQTT SocketException: $e', name: 'MqttService');
       client!.disconnect();
     }
 
@@ -40,7 +40,7 @@ class MqttService {
       client!.updates!.listen((List<MqttReceivedMessage<MqttMessage>> c) {
         final recMess = c[0].payload as MqttPublishMessage;
         final pt = MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
-        print('MQTT Received message: topic is ${c[0].topic}, payload is $pt');
+        developer.log('MQTT Received: topic=${c[0].topic}, payload=$pt', name: 'MqttService');
       });
     }
   }
@@ -50,22 +50,22 @@ class MqttService {
       final builder = MqttClientPayloadBuilder();
       builder.addString(payload);
       client!.publishMessage('merchant/payment', MqttQos.exactlyOnce, builder.payload!);
-      print('MQTT Published to merchant/payment: $payload');
+      developer.log('MQTT Published to merchant/payment: $payload', name: 'MqttService');
     } else {
-      print('MQTT Not connected - payment not published');
+      developer.log('MQTT Not connected - payment not published', name: 'MqttService');
     }
   }
 
   void onConnected() {
-    print('MQTT Connected');
+    developer.log('MQTT Connected', name: 'MqttService');
   }
 
   void onDisconnected() {
-    print('MQTT Disconnected');
+    developer.log('MQTT Disconnected', name: 'MqttService');
     // Add retry logic here if needed
   }
 
   void onSubscribed(String topic) {
-    print('MQTT Subscribed topic: $topic');
+    developer.log('MQTT Subscribed topic: $topic', name: 'MqttService');
   }
 }
