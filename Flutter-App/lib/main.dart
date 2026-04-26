@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/theme/app_theme.dart';
-import 'features/dashboard/main_screen.dart';
+import 'features/splash/splash_screen.dart';
 import 'services/local_storage_service.dart';
 import 'services/mqtt_service.dart';
 import 'services/notification_service.dart';
@@ -36,7 +36,7 @@ class SmartMerchantApp extends ConsumerWidget {
       title: 'Smart Merchant Assistant',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
-      home: const MainScreen(),
+      home: const SplashScreen(),
     );
   }
 }

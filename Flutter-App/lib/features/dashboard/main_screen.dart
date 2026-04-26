@@ -3,8 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dashboard_screen.dart';
 import 'analytics_screen.dart';
+import 'reports_screen.dart';
 import '../transactions/transactions_screen.dart';
 import '../../services/notification_access_service.dart';
+import '../../services/auto_sync_service.dart';
+import '../../core/theme/app_theme.dart';
 
 class MainScreen extends ConsumerStatefulWidget {
   const MainScreen({super.key});
@@ -14,13 +17,25 @@ class MainScreen extends ConsumerStatefulWidget {
 }
 
 class _MainScreenState extends ConsumerState<MainScreen> {
+  bool _isSyncing = false;
   int _currentIndex = 0;
-  final screens = const [DashboardScreen(), TransactionsScreen(), AnalyticsScreen()];
+  final screens = const [DashboardScreen(), TransactionsScreen(), AnalyticsScreen(), ReportsScreen()];
 
   @override
   void initState() {
     super.initState();
     _checkPermissions();
+    // Start the auto-sync timer
+    Future.microtask(() {
+      ref.read(autoSyncServiceProvider).startSyncTimer();
+    });
+  }
+
+  @override
+  void dispose() {
+    // Stop the auto-sync timer when the main screen is disposed
+    ref.read(autoSyncServiceProvider).stopSyncTimer();
+    super.dispose();
   }
 
   Future<void> _checkPermissions() async {
@@ -72,8 +87,36 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         return 'Transactions';
       case 2:
         return 'Analytics';
+      case 3:
+        return 'Reports';
       default:
         return 'Smart Merchant';
+    }
+  }
+
+  Future<void> _manualSync() async {
+    setState(() => _isSyncing = true);
+    try {
+      await ref.read(autoSyncServiceProvider).manualSync();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('✅ Sync complete!'),
+            backgroundColor: AppTheme.accentGreen,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Sync failed: $e'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSyncing = false);
     }
   }
 
@@ -84,6 +127,20 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         title: Text(_getTitle()),
         centerTitle: true,
         actions: [
+          IconButton(
+            tooltip: 'Sync Now',
+            icon: _isSyncing
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppTheme.accentGreen,
+                    ),
+                  )
+                : const Icon(Icons.sync_rounded),
+            onPressed: _isSyncing ? null : _manualSync,
+          ),
           IconButton(
             icon: const Icon(Icons.notifications_outlined),
             onPressed: () {},
@@ -109,6 +166,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             icon: Icon(Icons.analytics_outlined),
             selectedIcon: Icon(Icons.analytics),
             label: 'Analytics',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.summarize_outlined),
+            selectedIcon: Icon(Icons.summarize),
+            label: 'Reports',
           ),
         ],
       ),

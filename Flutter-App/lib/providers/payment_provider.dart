@@ -43,7 +43,7 @@ class PaymentNotifier extends StateNotifier<List<Transaction>> {
     // 4. Sync to Cloud
     final api = ref.read(apiServiceProvider);
     try {
-      await api.postPaymentData(tx.toJson());
+      await api.post('/sync', data: {'transactions': [tx.toJson()]});
     } catch (e) {
       // It will remain in offline storage
       developer.log('Cloud sync failed for ${tx.id}', error: e);

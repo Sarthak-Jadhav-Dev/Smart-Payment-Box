@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
   // Dark Theme Colors
@@ -103,7 +104,8 @@ class AppTheme {
         hintStyle: const TextStyle(color: textMuted),
         labelStyle: const TextStyle(color: textSecondary),
       ),
-      textTheme: const TextTheme(
+      textTheme: GoogleFonts.poppinsTextTheme(
+        const TextTheme(
         displayLarge: TextStyle(
           color: textPrimary,
           fontSize: 32,
@@ -117,26 +119,29 @@ class AppTheme {
         displaySmall: TextStyle(
           color: textPrimary,
           fontSize: 20,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.bold, // changed to bold
         ),
         headlineMedium: TextStyle(
           color: textPrimary,
           fontSize: 18,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.bold, // changed to bold
         ),
         bodyLarge: TextStyle(
           color: textPrimary,
           fontSize: 16,
+          fontWeight: FontWeight.bold, // bold for legibility per request
         ),
         bodyMedium: TextStyle(
           color: textSecondary,
           fontSize: 14,
+          fontWeight: FontWeight.bold, // bold
         ),
         bodySmall: TextStyle(
           color: textMuted,
           fontSize: 12,
+          fontWeight: FontWeight.bold, // bold
         ),
-      ),
+      )),
       dividerTheme: DividerThemeData(
         color: textSecondary,
         thickness: 1,
@@ -161,8 +166,11 @@ class AppTheme {
         elevation: 4,
       ),
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: darkCard,
-        contentTextStyle: const TextStyle(color: textPrimary),
+        backgroundColor: const Color(0xFF81C784), // Muted light green
+        contentTextStyle: const TextStyle(
+          color: Colors.black, // Black text for high contrast
+          fontWeight: FontWeight.bold,
+        ),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),

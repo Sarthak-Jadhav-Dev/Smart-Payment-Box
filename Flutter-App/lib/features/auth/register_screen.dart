@@ -5,55 +5,67 @@ import 'package:lottie/lottie.dart';
 import '../../core/theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../dashboard/main_screen.dart';
-import 'register_screen.dart';
+import '../onboarding/onboarding_screen.dart';
 
-class LoginScreen extends ConsumerStatefulWidget {
-  const LoginScreen({super.key});
+class RegisterScreen extends ConsumerStatefulWidget {
+  const RegisterScreen({super.key});
 
   @override
-  ConsumerState<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _LoginScreenState extends ConsumerState<LoginScreen> {
+class _RegisterScreenState extends ConsumerState<RegisterScreen> {
+  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
 
   @override
   void dispose() {
+    _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
   void _navigateToDashboard() {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => const MainScreen(),
-      ),
-    );
+    final state = ref.read(authProvider);
+    if (state.justRegistered) {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const OnboardingScreen()),
+        (route) => false,
+      );
+    } else {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const MainScreen()),
+        (route) => false,
+      );
+    }
   }
 
-  void _navigateToRegister() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const RegisterScreen(),
-      ),
-    );
-  }
-
-  Future<void> _handleLogin() async {
+  Future<void> _handleRegister() async {
+    final name = _nameController.text.trim();
     final email = _emailController.text.trim();
     final password = _passwordController.text;
+    final confirmPassword = _confirmPasswordController.text;
 
-    if (email.isEmpty || password.isEmpty) {
+    if (name.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter both email and password')),
+        const SnackBar(content: Text('Please fill all fields')),
       );
       return;
     }
 
-    await ref.read(authProvider.notifier).login(email, password);
+    if (password != confirmPassword) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Passwords do not match')),
+      );
+      return;
+    }
+
+    await ref.read(authProvider.notifier).register(name, email, password);
     
     if (!mounted) return;
     
@@ -73,30 +85,36 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     return Scaffold(
       backgroundColor: AppTheme.darkBackground,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: AppTheme.textPrimary),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 32.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const SizedBox(height: 60),
-
               // Logo/Animation
               Container(
-                width: 150,
-                height: 150,
+                width: 120,
+                height: 120,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      AppTheme.accentGreen.withValues(alpha: 0.2),
-                      AppTheme.accentBlue.withValues(alpha: 0.1),
+                      AppTheme.accentBlue.withValues(alpha: 0.2),
+                      AppTheme.accentGreen.withValues(alpha: 0.1),
                     ],
                   ),
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
-                    color: AppTheme.accentGreen.withValues(alpha: 0.3),
+                    color: AppTheme.accentBlue.withValues(alpha: 0.3),
                     width: 2,
                   ),
                 ),
@@ -104,15 +122,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   borderRadius: BorderRadius.circular(24),
                   child: Center(
                     child: Lottie.asset(
-                      'assets/lottie/login.json',
-                      width: 120,
-                      height: 120,
+                      'assets/lottie/welcome.json',
+                      width: 100,
+                      height: 100,
                       fit: BoxFit.contain,
                       errorBuilder: (context, error, stackTrace) {
                         return const Icon(
-                          Icons.account_circle_rounded,
-                          size: 80,
-                          color: AppTheme.accentGreen,
+                          Icons.person_add_alt_1_rounded,
+                          size: 60,
+                          color: AppTheme.accentBlue,
                         );
                       },
                     ),
@@ -120,11 +138,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
               ).animate().scale(delay: 100.ms, duration: 600.ms).fadeIn(),
 
-              const SizedBox(height: 40),
+              const SizedBox(height: 30),
 
               // Title
               const Text(
-                'Welcome Back!',
+                'Create Account',
                 style: TextStyle(
                   color: AppTheme.textPrimary,
                   fontSize: 32,
@@ -135,7 +153,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               const SizedBox(height: 8),
 
               const Text(
-                'Sign in to your account',
+                'Sign up to get started',
                 style: TextStyle(
                   color: AppTheme.textSecondary,
                   fontSize: 16,
@@ -143,6 +161,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ).animate().slideY(begin: 0.3, delay: 300.ms).fadeIn(),
 
               const SizedBox(height: 40),
+
+              // Name Field
+              TextFormField(
+                controller: _nameController,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  hintText: 'Full Name',
+                  hintStyle: const TextStyle(color: AppTheme.textMuted),
+                  prefixIcon: const Icon(Icons.person_outline, color: AppTheme.textSecondary),
+                  filled: true,
+                  fillColor: AppTheme.darkCard,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ).animate().slideX(begin: -0.2, delay: 400.ms).fadeIn(),
+
+              const SizedBox(height: 16),
 
               // Email Field
               TextFormField(
@@ -159,7 +196,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     borderSide: BorderSide.none,
                   ),
                 ),
-              ).animate().slideX(begin: -0.2, delay: 400.ms).fadeIn(),
+              ).animate().slideX(begin: 0.2, delay: 500.ms).fadeIn(),
 
               const SizedBox(height: 16),
 
@@ -190,18 +227,38 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     borderSide: BorderSide.none,
                   ),
                 ),
-              ).animate().slideX(begin: 0.2, delay: 500.ms).fadeIn(),
+              ).animate().slideX(begin: -0.2, delay: 600.ms).fadeIn(),
+
+              const SizedBox(height: 16),
+
+              // Confirm Password Field
+              TextFormField(
+                controller: _confirmPasswordController,
+                obscureText: _obscurePassword,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  hintText: 'Confirm Password',
+                  hintStyle: const TextStyle(color: AppTheme.textMuted),
+                  prefixIcon: const Icon(Icons.lock_outline, color: AppTheme.textSecondary),
+                  filled: true,
+                  fillColor: AppTheme.darkCard,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ).animate().slideX(begin: 0.2, delay: 700.ms).fadeIn(),
 
               const SizedBox(height: 40),
 
-              // Login Button
+              // Register Button
               SizedBox(
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: authState.isLoading ? null : _handleLogin,
+                  onPressed: authState.isLoading ? null : _handleRegister,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.accentGreen,
+                    backgroundColor: AppTheme.accentBlue,
                     foregroundColor: Colors.black,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
@@ -218,39 +275,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ),
                         )
                       : const Text(
-                          'Login',
+                          'Register',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                 ),
-              ).animate().slideY(begin: 0.5, delay: 600.ms).fadeIn(),
+              ).animate().slideY(begin: 0.5, delay: 800.ms).fadeIn(),
 
               const SizedBox(height: 24),
-
-              // Register Link
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    'Don\'t have an account? ',
-                    style: TextStyle(color: AppTheme.textSecondary),
-                  ),
-                  GestureDetector(
-                    onTap: _navigateToRegister,
-                    child: const Text(
-                      'Register',
-                      style: TextStyle(
-                        color: AppTheme.accentGreen,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ).animate().fadeIn(delay: 700.ms),
-
-              const SizedBox(height: 40),
             ],
           ),
         ),
