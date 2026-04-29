@@ -12,7 +12,11 @@ const app = express();
 
 app.use(helmet());
 app.use(morgan('combined'));
-app.use(cors());
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 app.use(express.json());
 
 // Basic Rate Limiting: max 100 requests per 15 minutes per IP
@@ -32,6 +36,9 @@ app.get('/health', (req, res) => {
 });
 
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-  console.log(`App-Backend server running on port ${PORT}`);
+const HOST = process.env.HOST || '0.0.0.0';
+
+app.listen(PORT, HOST, () => {
+  console.log(`App-Backend server running on http://${HOST}:${PORT}`);
+  console.log(`For phone testing, use your laptop's IP: http://<YOUR_LAPTOP_IP>:${PORT}`);
 });

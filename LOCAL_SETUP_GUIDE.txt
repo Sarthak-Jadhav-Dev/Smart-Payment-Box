@@ -1,0 +1,193 @@
+================================================================================
+                SMART PAYMENT BOX - LOCAL DEVELOPMENT SETUP GUIDE
+================================================================================
+
+This guide helps you run the App-Backend locally on your laptop and connect
+your Flutter app running on your phone to it.
+
+================================================================================
+                           FILES THAT WERE MODIFIED
+================================================================================
+
+1. Flutter-App/lib/services/api_service.dart
+   - Changed baseUrl to use local IP address
+
+2. App-Backend/src/server.js
+   - Added HOST binding (0.0.0.0) to accept external connections
+   - Updated CORS to allow all origins
+
+3. Flutter-App/android/app/src/main/AndroidManifest.xml
+   - Added INTERNET and ACCESS_NETWORK_STATE permissions
+   - Added usesCleartextTraffic for HTTP support
+
+================================================================================
+                        STEP-BY-STEP INSTRUCTIONS
+================================================================================
+
+--------------------------------------------------------------------------------
+STEP 1: FIND YOUR LAPTOP'S LOCAL IP ADDRESS
+--------------------------------------------------------------------------------
+
+Open PowerShell on your laptop and run:
+
+    ipconfig
+
+Look for your Wi-Fi adapter section and note the "IPv4 Address".
+Example: 192.168.1.5
+
+--------------------------------------------------------------------------------
+STEP 2: UPDATE THE FLUTTER APP WITH YOUR IP
+--------------------------------------------------------------------------------
+
+Open this file in your IDE:
+    Flutter-App/lib/services/api_service.dart
+
+Find line 10:
+    const String apiBaseUrl = 'http://192.168.1.100:4000/api';
+
+Change '192.168.1.100' to YOUR actual laptop IP address.
+Example: const String apiBaseUrl = 'http://192.168.1.5:4000/api';
+
+Save the file.
+
+--------------------------------------------------------------------------------
+STEP 3: START THE BACKEND SERVER
+--------------------------------------------------------------------------------
+
+Open PowerShell and navigate to the backend folder:
+
+    cd d:\Projects_Extended\Smart-Payment-Box\App-Backend
+
+Install dependencies (first time only):
+
+    npm install
+
+Start the development server:
+
+    npm run dev
+
+You should see output like:
+    App-Backend server running on http://0.0.0.0:4000
+    For phone testing, use your laptop's IP: http://<YOUR_LAPTOP_IP>:4000
+
+IMPORTANT: Keep this terminal window open while testing!
+
+--------------------------------------------------------------------------------
+STEP 4: VERIFY BACKEND IS ACCESSIBLE FROM YOUR PHONE
+--------------------------------------------------------------------------------
+
+On your phone, open a web browser and visit:
+
+    http://YOUR_LAPTOP_IP:4000/health
+
+Example: http://192.168.1.5:4000/health
+
+You should see JSON response:
+    {"status":"ok","timestamp":"..."}
+
+If this doesn't work:
+- Make sure both devices are on the same Wi-Fi network
+- Check Windows Firewall is allowing Node.js on port 4000
+- Try disabling firewall temporarily for testing
+
+--------------------------------------------------------------------------------
+STEP 5: RUN FLUTTER APP ON YOUR PHONE
+--------------------------------------------------------------------------------
+
+Option A: USB Debugging (Recommended for development)
+----------------------------------------------------
+1. Enable Developer Options on your phone:
+   - Go to Settings > About Phone > Tap "Build Number" 7 times
+2. Enable USB Debugging:
+   - Go to Settings > Developer Options > Turn on "USB Debugging"
+3. Connect your phone to laptop via USB cable
+4. In PowerShell, run:
+
+    cd d:\Projects_Extended\Smart-Payment-Box\Flutter-App
+    flutter run
+
+Option B: Build APK and Install
+-------------------------------
+1. Build the debug APK:
+
+    cd d:\Projects_Extended\Smart-Payment-Box\Flutter-App
+    flutter build apk --debug
+
+2. The APK will be at:
+    build\app\outputs\flutter-apk\app-debug.apk
+
+3. Transfer this file to your phone (via USB, Bluetooth, or file sharing)
+4. Install and open the app on your phone
+
+================================================================================
+                           IMPORTANT REQUIREMENTS
+================================================================================
+
+1. SAME WI-FI NETWORK
+   Both your laptop and phone MUST be connected to the same Wi-Fi network.
+
+2. WINDOWS FIREWALL
+   Allow Node.js through Windows Defender Firewall on port 4000.
+   OR temporarily disable firewall for testing.
+
+3. BACKEND MUST BE RUNNING
+   Keep the PowerShell window with "npm run dev" open at all times.
+   If you close it, the backend stops and your app won't connect.
+
+4. USE CORRECT IP ADDRESS
+   If your laptop's IP changes (e.g., reconnect to Wi-Fi), update the
+   apiBaseUrl in api_service.dart with the new IP.
+
+================================================================================
+                      SWITCHING BACK TO PRODUCTION
+================================================================================
+
+When you want to use the online backend again, edit:
+    Flutter-App/lib/services/api_service.dart
+
+Change line 10 to:
+    const String apiBaseUrl = 'https://sarthak-jadhav-ai-smart-payment-backend.hf.space/api';
+
+================================================================================
+                             TROUBLESHOOTING
+================================================================================
+
+Problem: "Connection refused" or "Failed to connect"
+Solution:
+- Check backend is running (npm run dev terminal is open)
+- Verify IP address is correct in api_service.dart
+- Ensure phone and laptop are on same Wi-Fi
+- Check firewall settings
+
+Problem: "Cleartext HTTP traffic not permitted"
+Solution:
+- The AndroidManifest.xml has been updated with usesCleartextTraffic="true"
+- Clean and rebuild: flutter clean, then flutter run
+
+Problem: Backend starts but phone can't access /health
+Solution:
+- Try accessing http://YOUR_IP:4000/health from laptop browser first
+- Check if Windows Firewall is blocking port 4000
+- Try: netsh advfirewall firewall add rule name="Node.js" dir=in action=allow protocol=tcp localport=4000
+
+================================================================================
+                              QUICK REFERENCE
+================================================================================
+
+Check your IP:
+    ipconfig
+
+Start backend:
+    cd App-Backend
+    npm run dev
+
+Run Flutter on phone:
+    cd Flutter-App
+    flutter run
+
+Build APK:
+    flutter build apk --debug
+
+================================================================================
+                           CREATED: April 29, 2026
+================================================================================

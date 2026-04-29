@@ -1,0 +1,134 @@
+================================================================================
+                    RENDER DEPLOYMENT - KEEP ALIVE GUIDE
+================================================================================
+
+This guide helps you keep your App-Backend active on Render's free tier.
+Render free tier spins down after 15 minutes of inactivity.
+
+================================================================================
+                          METHOD 1: UPTIME ROBOT (EASIEST)
+================================================================================
+
+1. Go to https://uptimerobot.com/
+2. Create a free account
+3. Click "Add New Monitor"
+4. Set:
+   - Monitor Type: HTTP(s)
+   - Friendly Name: Smart Payment Backend
+   - URL: https://your-app.onrender.com/health (replace with your URL)
+   - Monitoring Interval: 5 minutes (free tier minimum)
+5. Save
+
+That's it! UptimeRobot will ping your backend every 5 minutes, keeping it awake.
+
+================================================================================
+                    METHOD 2: RENDER CRON JOB (RECOMMENDED)
+================================================================================
+
+Step 1: Deploy Your Backend
+----------------------------
+1. Push your code to GitHub
+2. Go to https://render.com
+3. Create a new Web Service
+4. Connect your GitHub repo
+5. Set:
+   - Name: smart-payment-backend
+   - Runtime: Node
+   - Build Command: npm install
+   - Start Command: node src/server.js
+   - Environment: Add BACKEND_URL with your app URL
+6. Deploy
+
+Step 2: Add Cron Job on Render
+------------------------------
+1. In your Render dashboard, click "New" > "Cron Job"
+2. Connect same GitHub repo
+3. Set:
+   - Name: keep-backend-alive
+   - Runtime: Node
+   - Schedule: */10 * * * *  (every 10 minutes)
+   - Command: node cron-ping.js
+   - Environment Variables: Add BACKEND_URL = https://your-app.onrender.com
+4. Create Cron Job
+
+================================================================================
+                    METHOD 3: BUILT-IN SELF-PING
+================================================================================
+
+This method adds a self-pinging mechanism to your server.
+
+Step 1: Update server.js
+------------------------
+Add this at the top of server.js:
+
+    const KeepAlive = require('./keep-alive');
+
+Add this before app.listen():
+
+    // Self-ping to keep Render free tier alive
+    const keepAlive = new KeepAlive(process.env.BACKEND_URL, 10);
+    keepAlive.start();
+
+Step 2: Set Environment Variable
+--------------------------------
+In Render dashboard, add:
+    BACKEND_URL = https://your-app.onrender.com
+
+================================================================================
+                        METHOD COMPARISON
+================================================================================
+
+| Method          | Effort | Reliability | Cost  |
+|-----------------|--------|-------------|-------|
+| UptimeRobot     | Low    | High        | Free  |
+| Render Cron Job | Medium | High        | Free  |
+| Self-Ping       | Low    | Medium      | Free  |
+
+RECOMMENDATION: Use UptimeRobot - easiest to set up and most reliable.
+
+================================================================================
+                      IMPORTANT NOTES
+================================================================================
+
+1. RENDER FREE TIER LIMITS
+   - Spins down after 15 min inactivity
+   - Takes 30-60 seconds to wake up
+   - 750 hours/month limit (roughly always-on for one service)
+
+2. BACKEND_URL VARIABLE
+   This is needed for self-ping and cron methods. Set it to your
+   Render app URL (e.g., https://smart-payment-backend.onrender.com)
+
+3. HEALTH ENDPOINT
+   Your backend already has a /health endpoint that returns 200 OK.
+   All methods use this endpoint for pinging.
+
+4. WAKE-UP TIME
+   Even with keep-alive, first request after deploy might be slow
+   as the service initializes. Subsequent requests will be fast.
+
+================================================================================
+                            FILES PROVIDED
+================================================================================
+
+1. cron-ping.js
+   Standalone script for Render Cron Job. Pings /health once and exits.
+
+2. keep-alive.js
+   Module for built-in self-ping. Import into server.js for automatic pings.
+
+3. RENDER_DEPLOY_GUIDE.txt (this file)
+   Complete deployment and keep-alive instructions.
+
+================================================================================
+                          QUICK CHECKLIST
+================================================================================
+
+[ ] Code pushed to GitHub
+[ ] Web Service created on Render
+[ ] Environment variables set (PORT, BACKEND_URL, Supabase keys, etc.)
+[ ] Service deployed and /health endpoint responding
+[ ] Keep-alive method configured (UptimeRobot/Cron/Self-ping)
+[ ] Tested that backend stays alive after 15+ minutes
+
+================================================================================

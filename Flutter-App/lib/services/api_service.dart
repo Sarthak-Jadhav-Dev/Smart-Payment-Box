@@ -3,14 +3,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final apiServiceProvider = Provider<ApiService>((ref) => ApiService());
 
+// Change this to your laptop's local IP address when testing on phone
+// Use 'http://192.168.X.X:4000/api' (replace with your actual IP)
+// Or use 'http://10.0.2.2:4000/api' for Android emulator
+// Or use 'http://localhost:4000/api' for iOS simulator
+const String apiBaseUrl = 'http://192.168.1.100:4000/api';
+
 class ApiService {
   late final Dio _dio;
 
   ApiService() {
     _dio = Dio(
       BaseOptions(
-        baseUrl:
-            'http://192.168.1.4:4000/api', // App-Backend URL
+        baseUrl: apiBaseUrl,
         connectTimeout: const Duration(seconds: 10),
         receiveTimeout: const Duration(seconds: 10),
       ),
@@ -53,6 +58,7 @@ class ApiService {
       rethrow;
     }
   }
+
   Future<List<int>> getBytes(String path) async {
     try {
       final response = await _dio.get<List<int>>(

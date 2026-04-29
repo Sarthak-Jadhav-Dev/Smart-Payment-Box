@@ -19,7 +19,12 @@ class MainScreen extends ConsumerStatefulWidget {
 class _MainScreenState extends ConsumerState<MainScreen> {
   bool _isSyncing = false;
   int _currentIndex = 0;
-  final screens = const [DashboardScreen(), TransactionsScreen(), AnalyticsScreen(), ReportsScreen()];
+  final screens = const [
+    DashboardScreen(),
+    TransactionsScreen(),
+    AnalyticsScreen(),
+    ReportsScreen(),
+  ];
 
   @override
   void initState() {
@@ -77,7 +82,6 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       ),
     );
   }
-
 
   String _getTitle() {
     switch (_currentIndex) {
